@@ -1,4 +1,3 @@
-from ast import expr
 from jsonpath_ng import parse
 from typing import Callable, List
 from functools import lru_cache
