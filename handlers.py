@@ -96,4 +96,26 @@ def split(data, left_expr, right_expr) -> List[str]:
 def first(data, expr):
     list = expr(data)
 
-    return list[0]
+    return list[0] if len(list) > 0 else None
+
+
+def last(data, expr):
+    list = expr(data)
+
+    return list[-1] if len(list) > 0 else None
+
+
+def in_list(data, left_expr, right_expr) -> bool:
+    list, needle = dual_expr(data, left_expr, right_expr)
+
+    return needle in list
+
+
+def find(data, left_expr, right_expr):
+    list, needle = dual_expr(data, left_expr, right_expr)
+    return next(iter([item for item in list if item == needle]), None)
+
+
+def find_all(data, left_expr, right_expr):
+    list, needle = dual_expr(data, left_expr, right_expr)
+    return [item for item in list if item == needle]

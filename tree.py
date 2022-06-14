@@ -1,6 +1,6 @@
 from typing import List
 
-from handlers import _not, contains, ends_with, eq, first, length, neq, path, split, starts_with
+from handlers import _not, contains, ends_with, eq, first, last, length, neq, path, split, starts_with
 
 
 class TreeNode:
@@ -60,7 +60,7 @@ def is_primitive_node(value: TreeNode):
 
 def is_function_node(leaf: TreeNode):
     expr = leaf._expression
-    return expr in ["eq", "neq", "split", "length", "not", "starts-with", "ends-with", "contains", "first"]
+    return expr in ["eq", "neq", "split", "length", "not", "starts-with", "ends-with", "contains", "first", "last"]
 
 
 def get_function_handler(node: TreeNode):
@@ -82,6 +82,8 @@ def get_function_handler(node: TreeNode):
         return contains_handler
     if node._expression == "first":
         return first_handler
+    if node._expression == "last":
+        return last_handler
 
     raise Exception(f'handler {node._expression} not implemented or unknown')
 
@@ -171,3 +173,10 @@ def first_handler(node: TreeNode):
     first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
 
     return lambda data: first(data, first_arg)
+
+def last_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+
+    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
+
+    return lambda data: last(data, first_arg)

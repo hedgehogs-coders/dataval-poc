@@ -55,3 +55,11 @@ class TestStringMatchingsShouldPass:
                 ]
             '''
         self.validate(benchmark, rule)
+
+    def test_split_and_last_0(self, benchmark):
+        rule = '''
+                [
+                    ["eq", ["last", ["split", "$.foo", "_"]], "string"]
+                ]
+            '''
+        self.validate(benchmark, rule)
