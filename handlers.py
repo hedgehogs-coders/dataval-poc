@@ -15,6 +15,10 @@ def eq(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.eq)
 
 
+def neq(data, left_expr, right_expr) -> bool:
+    return dual_expr(data, left_expr, right_expr, operator.ne)
+
+
 def gt(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.gt)
 
@@ -29,6 +33,38 @@ def lt(data, left_expr, right_expr) -> bool:
 
 def lte(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.le)
+
+
+# string matching functions
+
+def starts_with(data, left_expr, right_expr) -> bool:
+    string, pattern = dual_expr(data, left_expr, right_expr)
+
+    if not isinstance(string, str) or not isinstance(pattern, str):
+        raise Exception(
+            "both arguments of starts-with must evaluate to strings")
+
+    return string.startswith(pattern)
+
+
+def ends_with(data, left_expr, right_expr) -> bool:
+    string, pattern = dual_expr(data, left_expr, right_expr)
+
+    if not isinstance(string, str) or not isinstance(pattern, str):
+        raise Exception(
+            "both arguments of ends-with must evaluate to strings")
+
+    return string.endswith(pattern)
+
+
+def contains(data, left_expr, right_expr) -> bool:
+    string, pattern = dual_expr(data, left_expr, right_expr)
+
+    if not isinstance(string, str) or not isinstance(pattern, str):
+        raise Exception(
+            "both arguments of ends-with must evaluate to strings")
+
+    return string != None and pattern in string
 
 
 def _not(data, expr) -> bool:
@@ -53,3 +89,11 @@ def split(data, left_expr, right_expr) -> List[str]:
         raise Exception(
             f"split couldn't be performed on  types {type(string)} and {type(divider)}")
     return string.split(divider)
+
+
+# list functions
+
+def first(data, expr):
+    list = expr(data)
+
+    return list[0]

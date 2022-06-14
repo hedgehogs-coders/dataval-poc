@@ -4,7 +4,7 @@ import sys
 sys.path.append("..")
 
 
-@pytest.mark.benchmark(warmup_iterations=1000, min_time=0.5,max_time=1,min_rounds=3, warmup=True)
+@pytest.mark.benchmark(warmup_iterations=1000, min_time=0.5, max_time=1, min_rounds=5, warmup=True)
 class TestNumbersShouldPass:
 
     data = {
@@ -74,6 +74,14 @@ class TestNumbersShouldPass:
         rule = '''
                 [
                     ["not", ["eq", "$.foo", "$.baz.foo.baz"]]
+                ]
+            '''
+        self.validate(benchmark, rule)
+
+    def test_eq_7(self, benchmark):
+        rule = '''
+                [
+                    ["neq", "$.foo", "$.baz.foo.baz"]
                 ]
             '''
         self.validate(benchmark, rule)
