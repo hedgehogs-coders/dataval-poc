@@ -1,3 +1,4 @@
+import math
 from jsonpath_ng import parse
 from typing import Callable, List
 from functools import lru_cache
@@ -13,6 +14,12 @@ def dual_expr(data, left_expr, right_expr, operator=None):
 # comparison functions
 def eq(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.eq)
+
+
+def eq_delta(data, left_expr, right_expr, delta_expr):
+    left, right = dual_expr(data, left_expr, right_expr)
+    delta = delta_expr(data)
+    return math.isclose(left, right, rel_tol=delta)
 
 
 def neq(data, left_expr, right_expr) -> bool:
@@ -67,10 +74,6 @@ def contains(data, left_expr, right_expr) -> bool:
     return string != None and pattern in string
 
 
-def _not(data, expr) -> bool:
-    return not expr(data)
-
-
 # data manipulation functions
 
 def length(data, expr) -> int:
@@ -89,6 +92,18 @@ def split(data, left_expr, right_expr) -> List[str]:
         raise Exception(
             f"split couldn't be performed on  types {type(string)} and {type(divider)}")
     return string.split(divider)
+
+
+def substring(data, left_expr, from_expr, to_expr):
+    string = left_expr(data)
+    start_index = from_expr(data)
+    end_index = to_expr(data)
+    return string[start_index:end_index]
+
+
+def index(data, left_expr, right_expr):
+    string, substring = dual_expr(data, left_expr, right_expr)
+    return string.index(substring)
 
 
 # list functions
@@ -119,3 +134,31 @@ def find(data, left_expr, right_expr):
 def find_all(data, left_expr, right_expr):
     list, needle = dual_expr(data, left_expr, right_expr)
     return [item for item in list if item == needle]
+
+
+# aggregating functions
+
+def _all(data, *expressions):
+    return all([expression(data) for expression in expressions])
+
+
+def some(data, *expressions):
+    return any([expression(data) for expression in expressions])
+
+
+def none(data, *expressions):
+    return not _all(data, *expressions)
+
+
+# logic functions
+
+def _not(data, expr) -> bool:
+    return not expr(data)
+
+
+def _if(data, condition_expr, true_expr, false_expr=None):
+    if condition_expr(data):
+        return true_expr(data)
+
+    if false_expr is not None:
+        return false_expr(data)

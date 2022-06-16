@@ -85,3 +85,11 @@ class TestNumbersShouldPass:
                 ]
             '''
         self.validate(benchmark, rule)
+
+    def test_eq_delta_0(self, benchmark):
+        rule = '''
+                [
+                    ["eq_delta", 0.1, 0.11, 0.099]
+                ]
+        '''
+        self.validate(benchmark, rule)
