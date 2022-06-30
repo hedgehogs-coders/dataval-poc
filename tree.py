@@ -21,6 +21,7 @@ class TreeNode:
         for leaf in self._leafs:
             handler = get_handler_for(leaf)
             result.append({
+                "name": leaf._expression,
                 "validate": handler(leaf)
             })
 
@@ -47,6 +48,13 @@ def get_handler_for(node: TreeNode):
 
     raise Exception(f'Unsupported expression {node._expression}')
 
+
+def get_handlers(node: TreeNode):
+    result = []
+    for leaf in node._leafs:
+        result.append(get_handler_for(leaf)(leaf))
+
+    return result
 
 def is_path_node(value: TreeNode):
     expr = value._expression
@@ -118,36 +126,26 @@ def get_function_handler(node: TreeNode):
 
 def eq_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: eq(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: eq(data, *args)
 
 
 def eq_delta_handler(node: TreeNode):
     ensure_leafs(node, 3)
-
-    args = [get_handler_for(arg)(arg) for arg in node._leafs]
-
+    args = get_handlers(node)
     return lambda data: eq_delta(data, *args)
 
 
 def neq_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: neq(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: neq(data, *args)
 
 
 def length_handler(node: TreeNode):
     ensure_leafs(node, 1)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-
-    return lambda data: length(data, first_arg)
+    args = get_handlers(node)
+    return lambda data: length(data, *args)
 
 
 def path_handler(node: TreeNode):
@@ -158,11 +156,8 @@ def path_handler(node: TreeNode):
 
 def split_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: split(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: split(data, *args)
 
 
 def literal_handler(node: TreeNode):
@@ -171,70 +166,52 @@ def literal_handler(node: TreeNode):
 
 def not_handler(node: TreeNode):
     ensure_leafs(node, 1)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-
-    return lambda data: _not(data, first_arg)
+    args = get_handlers(node)
+    return lambda data: _not(data, *args)
 
 
 def starts_with_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: starts_with(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: starts_with(data, *args)
 
 
 def ends_with_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: ends_with(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: ends_with(data, *args)
 
 
 def contains_handler(node: TreeNode):
     ensure_leafs(node, 2)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-    second_arg = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    return lambda data: contains(data, first_arg, second_arg)
+    args = get_handlers(node)
+    return lambda data: contains(data, *args)
 
 
 def first_handler(node: TreeNode):
     ensure_leafs(node, 1)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-
-    return lambda data: first(data, first_arg)
+    args = get_handlers(node)
+    return lambda data: first(data, *args)
 
 
 def last_handler(node: TreeNode):
     ensure_leafs(node, 1)
-
-    first_arg = get_handler_for(node._leafs[0])(node._leafs[0])
-
-    return lambda data: last(data, first_arg)
+    args = get_handlers(node)
+    return lambda data: last(data, *args)
 
 
 def all_handler(node: TreeNode):
-    args = [get_handler_for(leaf)(leaf) for leaf in node._leafs]
-
+    args = get_handlers(node)
     return lambda data: _all(data, *args)
 
 
 def some_handler(node: TreeNode):
-    args = [get_handler_for(leaf)(leaf) for leaf in node._leafs]
-
+    args = get_handlers(node)
     return lambda data: some(data, *args)
 
 
 def none_handler(node: TreeNode):
-    args = [get_handler_for(leaf)(leaf) for leaf in node._leafs]
-
+    args = get_handlers(node)
     return lambda data: none(data, *args)
 
 
@@ -242,12 +219,5 @@ def if_handler(node: TreeNode):
     if 2 > len(node._leafs) > 3:
         raise Exception(
             f"if expects 2 or 3 arguments while {len(node._leafs)} were provided")
-
-    congition_expr = get_handler_for(node._leafs[0])(node._leafs[0])
-    true_expr = get_handler_for(node._leafs[1])(node._leafs[1])
-
-    false_expr = None
-    if len(node._leafs) == 3:
-        false_expr = get_handler_for(node._leafs[2])(node._leafs[2])
-
-    return lambda data: _if(data, congition_expr, true_expr, false_expr)
+    args = get_handlers(node)
+    return lambda data: _if(data, *args)

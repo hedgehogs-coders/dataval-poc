@@ -73,8 +73,20 @@ def contains(data, left_expr, right_expr) -> bool:
 
     return string != None and pattern in string
 
+# string manipulation functions
+
+
+def to_upper(data, expr):
+    string_val = expr(data)
+    return string_val.upper()
+
+
+def to_lower(data, expr):
+    string_val = expr(data)
+    return string_val.lower()
 
 # data manipulation functions
+
 
 def length(data, expr) -> int:
     return len(expr(data))
@@ -162,3 +174,61 @@ def _if(data, condition_expr, true_expr, false_expr=None):
 
     if false_expr is not None:
         return false_expr(data)
+
+
+# is functions
+
+def is_number(data, expr):
+    return is_integer(data, expr) or is_float(data, expr)
+
+
+def is_integer(data, expr):
+    int_value = expr(data)
+    return isinstance(int_value, int)
+
+
+def is_float(data, expr):
+    float_val = expr(data)
+    return isinstance(float_val, float)
+
+
+def is_alphanumeric(data, expr):
+    str_val = expr(data)
+    return str_val.isalnum()
+
+
+def is_string(data, expr):
+    str_value = expr(data)
+    return isinstance(str_value, str)
+
+
+def is_boolean(data, expr):
+    bool_val = expr(data)
+    return isinstance(bool_val, bool)
+
+
+def is_object(data, expr):
+    obj_val = expr(data)
+    return isinstance(obj_val, dict)
+
+
+def is_list(data, expr):
+    list_val = expr(data)
+    return isinstance(list_val, list)
+
+
+def is_null(data, expr):
+    null_val = expr(data)
+    return null_val == None
+
+
+def is_empty(data, expr):
+    """
+        works on strings or lists
+        string - returns false if length of string at least 1 or greater
+    """
+    value = expr(data)
+    if isinstance(value, (str, list)):
+        return len(value) == 0
+
+    raise Exception(f"is_empty could be applied to lists and strings {type(value).__name__} found")

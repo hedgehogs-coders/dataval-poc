@@ -12,7 +12,7 @@ class Validator:
             try:
                 result = validation_rule['validate'](obj)
                 if not result:
-                    raise Exception("something failed, and I need to provide enough context for response")
+                    raise Exception(f"validation failed for rule {validation_rule['name']}")
             except Exception as e:
                 errors.append(f"validation failed due to: {e}")
 
