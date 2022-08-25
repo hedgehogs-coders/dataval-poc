@@ -25,7 +25,11 @@ class TestNumbersShouldPass:
     def test_eq_0(self, benchmark):
         rule = '''
                 [
-                    ["eq", 1, 1]
+                    {
+                        "name": "test integer equality", 
+                        "error_message": "they are not equal", 
+                        "rule": ["eq", 1, 1]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -33,7 +37,9 @@ class TestNumbersShouldPass:
     def test_eq_1(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.foo", 1]
+                    {
+                        "rule": ["eq", "$.foo", 1]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -41,7 +47,9 @@ class TestNumbersShouldPass:
     def test_eq_2(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.foo", "$.bar"]
+                    {
+                        "rule": ["eq", "$.foo", "$.bar"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -49,7 +57,9 @@ class TestNumbersShouldPass:
     def test_eq_3(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.bar", "$.foo"]
+                    {
+                        "rule": ["eq", "$.bar", "$.foo"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -57,7 +67,9 @@ class TestNumbersShouldPass:
     def test_eq_4(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.foo", "$.baz.foo.bar"]
+                    {
+                        "rule": ["eq", "$.foo", "$.baz.foo.bar"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -65,7 +77,9 @@ class TestNumbersShouldPass:
     def test_eq_5(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.foo", "$.foo"]
+                    {
+                        "rule": ["eq", "$.foo", "$.foo"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -73,7 +87,9 @@ class TestNumbersShouldPass:
     def test_eq_6(self, benchmark):
         rule = '''
                 [
-                    ["not", ["eq", "$.foo", "$.baz.foo.baz"]]
+                    {
+                        "rule": ["not", ["eq", "$.foo", "$.baz.foo.baz"]]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -81,7 +97,9 @@ class TestNumbersShouldPass:
     def test_eq_7(self, benchmark):
         rule = '''
                 [
-                    ["neq", "$.foo", "$.baz.foo.baz"]
+                    {
+                        "rule": ["neq", "$.foo", "$.baz.foo.baz"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -89,7 +107,12 @@ class TestNumbersShouldPass:
     def test_eq_delta_0(self, benchmark):
         rule = '''
                 [
-                    ["eq_delta", 0.1, 0.11, 0.099]
+                    {
+                        "rule": ["eq_delta", 0.1, 0.11, 0.099]
+                    },
+                    {
+                        "rule": ["eq_delta", 1.1, 1.11, 0.01]
+                    }
                 ]
         '''
         self.validate(benchmark, rule)

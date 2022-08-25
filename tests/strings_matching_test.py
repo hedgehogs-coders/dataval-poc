@@ -18,7 +18,9 @@ class TestStringMatchingsShouldPass:
     def test_eq_string_0(self, benchmark):
         rule = '''
                 [
-                    ["eq", "$.foo", "some_string"]
+                    {
+                        "rule": ["eq", "$.foo", "some_string"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -26,7 +28,9 @@ class TestStringMatchingsShouldPass:
     def test_starts_with_string_0(self, benchmark):
         rule = '''
                 [
-                    ["starts-with", "$.foo", "some_"]
+                    {
+                        "rule": ["starts-with", "$.foo", "some_"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -35,7 +39,9 @@ class TestStringMatchingsShouldPass:
     def test_ends_with_string_0(self, benchmark):
         rule = '''
                 [
-                    ["ends-with", "$.foo", "_string"]
+                    {
+                        "rule": ["ends-with", "$.foo", "_string"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -43,7 +49,9 @@ class TestStringMatchingsShouldPass:
     def test_contains_string_0(self, benchmark):
         rule = '''
                 [
-                    ["contains", "$.foo", "me_str"]
+                    {
+                        "rule": ["contains", "$.foo", "me_str"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -51,7 +59,9 @@ class TestStringMatchingsShouldPass:
     def test_split_and_first_0(self, benchmark):
         rule = '''
                 [
-                    ["eq", ["first", ["split", "$.foo", "_"]], "some"]
+                    {
+                        "rule": ["eq", ["first", ["split", "$.foo", "_"]], "some"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -59,7 +69,9 @@ class TestStringMatchingsShouldPass:
     def test_split_and_last_0(self, benchmark):
         rule = '''
                 [
-                    ["eq", ["last", ["split", "$.foo", "_"]], "string"]
+                    {
+                        "rule": ["eq", ["last", ["split", "$.foo", "_"]], "string"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)

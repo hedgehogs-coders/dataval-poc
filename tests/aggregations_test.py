@@ -20,7 +20,9 @@ class TestAggregationsShouldPass:
     def test_all_0(self, benchmark):
         rule = '''
                 [
-                    ["all", true, ["not", false]]
+                    {
+                        "rule": ["all", true, ["not", false]]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -28,7 +30,9 @@ class TestAggregationsShouldPass:
     def test_all_1(self, benchmark):
         rule = '''
                 [
-                    ["all", "$.foo", ["not", "$.bar"], ["not", "$.baz"]]
+                    {
+                        "rule": ["all", "$.foo", ["not", "$.bar"], ["not", "$.baz"]]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -37,7 +41,9 @@ class TestAggregationsShouldPass:
     def test_some_0(self, benchmark):
         rule = '''
                 [
-                    ["some", true, false]
+                    {
+                        "rule": ["some", true, false]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -45,7 +51,9 @@ class TestAggregationsShouldPass:
     def test_some_1(self, benchmark):
         rule = '''
                 [
-                    ["some", "$.foo", "$.bar", "$.baz"]
+                    {
+                        "rule": ["some", "$.foo", "$.bar", "$.baz"]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)

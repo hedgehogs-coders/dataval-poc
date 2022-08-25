@@ -20,7 +20,9 @@ class TestLogicExpressionsShouldPass:
     def test_and_0(self, benchmark):
         rule = '''
                 [
-                    ["and", true, ["not", false]]
+                    {
+                        "rule": ["and", true, ["not", false]]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -28,7 +30,9 @@ class TestLogicExpressionsShouldPass:
     def test_and_1(self, benchmark):
         rule = '''
                 [
-                    ["and", "$.foo", ["and", ["not", "$.bar"], ["not", "$.baz"]]]
+                    {
+                        "rule": ["and", "$.foo", ["and", ["not", "$.bar"], ["not", "$.baz"]]]
+                    }
                 ]
             '''
         self.validate(benchmark, rule)
@@ -36,7 +40,9 @@ class TestLogicExpressionsShouldPass:
     def test_if_0(self, benchmark):
         rule = '''
             [
-                ["if", "$.foo", ["eq", "$.bar", false]]
+                {
+                    "rule": ["if", "$.foo", ["eq", "$.bar", false]]
+                }
             ]
         '''
         self.validate(benchmark, rule)
@@ -44,7 +50,9 @@ class TestLogicExpressionsShouldPass:
     def test_if_1(self, benchmark):
         rule = '''
             [
-                ["if", ["not","$.foo"], ["eq", "$.bar", true], ["and", ["eq", "$.baz", false], ["eq", "$.bar", false]]]
+                {
+                    "rule": ["if", ["not","$.foo"], ["eq", "$.bar", true], ["and", ["eq", "$.baz", false], ["eq", "$.bar", false]]]
+                }
             ]
         '''
         self.validate(benchmark, rule)

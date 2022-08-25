@@ -1,28 +1,35 @@
-from typing import List
+from typing import List, Optional
 
 from handlers import _all, _if, _not, contains, ends_with, eq, eq_delta, first, last, length, neq, none, path, some, split, starts_with
 
 
 class TreeNode:
-    _expression: str
+    _name: Optional[str]
+    _error_message: Optional[str]
+    _expression: Optional[str]
     _leafs: List['TreeNode']
 
     def __init__(self, obj: list, is_parent=False):
         if not is_parent:
-            self._expression = obj[0] if isinstance(obj, list) else obj
+            self._expression = obj[0] if isinstance(obj, list) else None if isinstance(obj, dict) else obj
             if isinstance(obj, list) and len(obj) > 1:
                 self._leafs: list[TreeNode] = [
                     as_tree(item, is_parent) for item in obj[1:]]
+            elif isinstance(obj, dict) and "rule" in obj and isinstance(obj['rule'], list):
+                self._name = obj.get('name', f'validation rule: {obj["rule"][0]}')
+                self._error_message = obj.get('error_message', f'error in rule: {obj["rule"][0]}')
+                self._leafs: list[TreeNode] = [as_tree(obj['rule'], is_parent)]
         else:
             self._leafs = [as_tree(leaf, False) for leaf in obj]
 
     def as_validation_tree(self):
         result = []
         for leaf in self._leafs:
-            handler = get_handler_for(leaf)
+            handler = rule_node_handler(leaf)
             result.append({
-                "name": leaf._expression,
-                "validate": handler(leaf)
+                "name": leaf._name or leaf._expression,
+                "error_message": leaf._error_message,
+                "validate": handler(leaf._leafs[0])
             })
 
         return result
@@ -45,6 +52,8 @@ def get_handler_for(node: TreeNode):
         return literal_handler
     if is_function_node(node):
         return get_function_handler(node)
+    if is_root_rule_node(node):
+        return rule_node_handler(node)
 
     raise Exception(f'Unsupported expression {node._expression}')
 
@@ -64,6 +73,10 @@ def is_path_node(value: TreeNode):
 def is_primitive_node(value: TreeNode):
     expr = value._expression
     return isinstance(expr, (str, int, float, bool)) and not hasattr(value, '_leafs')
+
+# in case we are going to support nested rules sometime
+def is_root_rule_node(value: TreeNode):
+    return value._expression is None and isinstance(value._name, str) and isinstance(value._error_message, str)
 
 
 def is_function_node(leaf: TreeNode):
@@ -128,6 +141,11 @@ def eq_handler(node: TreeNode):
     ensure_leafs(node, 2)
     args = get_handlers(node)
     return lambda data: eq(data, *args)
+
+
+def rule_node_handler(node: TreeNode):
+    assert len(node._leafs) == 1
+    return get_handler_for(node._leafs[0])
 
 
 def eq_delta_handler(node: TreeNode):
