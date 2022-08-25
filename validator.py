@@ -12,8 +12,8 @@ class Validator:
             try:
                 result = validation_rule['validate'](obj)
                 if not result:
-                    raise Exception(f"validation failed for rule {validation_rule['name']} with message: {validation_rule['error_message']}")
+                    raise Exception(f"{validation_rule['error_message']}")
             except Exception as e:
-                errors.append(e)
+                errors.append(f"validation failed for rule \"{validation_rule['name']}\" with message: \"{e}\"")
 
         return errors

@@ -1,4 +1,5 @@
 import math
+import numbers
 from jsonpath_ng import parse
 from typing import Callable, List
 from functools import lru_cache
@@ -40,6 +41,16 @@ def lt(data, left_expr, right_expr) -> bool:
 
 def lte(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.le)
+
+def in_range(data, expr, low, high):
+    return low(data) <= expr(data) <= high(data)
+
+
+def _abs(data, expr):
+    val = expr(data)
+    if not isinstance(val, numbers.Number):
+        raise Exception(f'{val} must be a number')
+    return abs(val) 
 
 
 # string matching functions

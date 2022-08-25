@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from handlers import _all, _if, _not, contains, ends_with, eq, eq_delta, first, last, length, neq, none, path, some, split, starts_with
+from handlers import _abs, _all, _if, _not, contains, ends_with, eq, eq_delta, first, in_range, last, length, neq, none, path, some, split, starts_with
 
 
 class TreeNode:
@@ -98,7 +98,9 @@ def is_function_node(leaf: TreeNode):
         "none",
         "and",
         "or",
-        "if"
+        "if",
+        "in-range",
+        "abs"
     ]
 
 
@@ -133,6 +135,10 @@ def get_function_handler(node: TreeNode):
         return none_handler
     if node._expression == "if":
         return if_handler
+    if node._expression == "in-range":
+        return in_range_handler
+    if node._expression == "abs":
+        return abs_handler
 
     raise Exception(f'handler {node._expression} not implemented or unknown')
 
@@ -158,6 +164,17 @@ def neq_handler(node: TreeNode):
     ensure_leafs(node, 2)
     args = get_handlers(node)
     return lambda data: neq(data, *args)
+
+def in_range_handler(node: TreeNode):
+    ensure_leafs(node, 3)
+    args = get_handlers(node)
+    return lambda data: in_range(data, *args)
+
+
+def abs_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: _abs(data, *args)
 
 
 def length_handler(node: TreeNode):

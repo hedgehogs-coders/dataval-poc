@@ -116,3 +116,13 @@ class TestNumbersShouldPass:
                 ]
         '''
         self.validate(benchmark, rule)
+
+    def test_abs_0(self, benchmark):
+        rule = '''
+                [
+                    {
+                        "rule": ["eq", 1, ["abs", -1]]
+                    }
+                ]
+        '''
+        self.validate(benchmark, rule)
