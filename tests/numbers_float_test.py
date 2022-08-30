@@ -1,3 +1,4 @@
+from distutils.log import error
 import pytest
 from validator import Validator
 import sys
@@ -93,3 +94,18 @@ class TestFloatsShouldPass:
                 ]
             '''
         self.validate(benchmark, rule)
+
+    def test_ceil_must_fail_0(self):
+        rule = '''
+                [
+                    {
+                        "name": "test ceil equality on non numbers", 
+                        "error_message": "got wrong round value", 
+                        "rule": ["eq", "$.foo", ["ceil", "foo"]]
+                    }
+                ]
+            '''
+        validator = Validator(rule)
+        
+        errors = validator.validate(self.data)
+        assert len(errors) == 1 and errors[0].startswith("validation failed for rule \"test ceil equality on non numbers\"") 
