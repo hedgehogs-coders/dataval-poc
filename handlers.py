@@ -1,3 +1,4 @@
+from ast import Raise
 import math
 import numbers
 from jsonpath_ng import parse
@@ -126,18 +127,6 @@ def to_lower(data, expr):
     string_val = expr(data)
     return string_val.lower()
 
-# data manipulation functions
-
-
-def length(data, expr) -> int:
-    return len(expr(data))
-
-
-@lru_cache(maxsize=512)
-def path(path: str) -> Callable:
-    jsonpath_expression = parse(path)
-    return jsonpath_expression.find
-
 
 def split(data, left_expr, right_expr) -> List[str]:
     string, divider = dual_expr(data, left_expr, right_expr)
@@ -157,6 +146,33 @@ def substring(data, left_expr, from_expr, to_expr):
 def index(data, left_expr, right_expr):
     string, substring = dual_expr(data, left_expr, right_expr)
     return string.index(substring)
+
+
+def concat(data, *expr_list):
+    result = ""
+    for expr in expr_list:
+        value = expr(data)
+
+        if not isinstance(value, str):
+            raise Exception(
+                f"all parts of concat function must evaluate to strings, {type(value).__name__} found")
+
+        result += value
+
+    return result
+
+
+# data manipulation functions
+
+
+def length(data, expr) -> int:
+    return len(expr(data))
+
+
+@lru_cache(maxsize=512)
+def path(path: str) -> Callable:
+    jsonpath_expression = parse(path)
+    return jsonpath_expression.find
 
 
 # list functions
@@ -278,3 +294,19 @@ def is_empty(data, expr):
 # date and time
 
 # cast functions
+
+# path functions
+
+
+def exists(data, expr):
+    value = expr(data)
+    return not (isinstance(value, list) and len(value) == 0)
+
+
+def lookup(data, expr):
+    value = expr(data)
+    if not isinstance(value, str):
+        raise Exception(
+            f"JSON path string expected {type(value).__name__} found")
+
+    return path(value)(data)

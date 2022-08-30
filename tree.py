@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import List, Optional
 
-from handlers import _abs, _all, _if, _not, _round, ceil, contains, ends_with, eq, eq_delta, first, floor, in_range, last, length, neq, none, path, some, split, starts_with
+from handlers import _abs, _all, _if, _not, _round, ceil, concat, contains, ends_with, eq, eq_delta, exists, first, floor, in_range, last, length, lookup, neq, none, path, some, split, starts_with
 
 
 class TreeNode:
@@ -109,7 +109,10 @@ def is_function_node(expr: str):
         "abs",
         "ceil",
         "floor",
-        "round"
+        "round",
+        "exists",
+        "concat",
+        "lookup"
     ]
 
 
@@ -155,6 +158,12 @@ def get_function_handler(node_expression: str):
         return floor_handler
     if node_expression == "round":
         return round_handler
+    if node_expression == "exists":
+        return exists_handler
+    if node_expression == "concat":
+        return concat_handler
+    if node_expression == "lookup":
+        return lookup_handler
 
     raise Exception(f'handler {node_expression} not implemented or unknown')
 
@@ -291,3 +300,23 @@ def if_handler(node: TreeNode):
             f"if expects 2 or 3 arguments while {len(node._leafs)} were provided")
     args = get_handlers(node)
     return lambda data: _if(data, *args)
+
+
+def exists_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: exists(data, *args)
+
+
+def concat_handler(node: TreeNode):
+    if len(node._leafs) < 1:
+        raise Exception("concat expects something to concatenate, no parts were provided")
+
+    args = get_handlers(node)
+    return lambda data: concat(data, *args)
+
+
+def lookup_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: lookup(data, *args)
