@@ -5,6 +5,8 @@ from typing import Callable, List
 from functools import lru_cache
 import operator
 
+# utility functions
+
 
 def dual_expr(data, left_expr, right_expr, operator=None):
     left = left_expr(data)
@@ -12,7 +14,26 @@ def dual_expr(data, left_expr, right_expr, operator=None):
     return operator(left, right) if operator is not None else (left, right)
 
 
+def unary_number_expr(data, expr, func):
+    val = expr(data)
+    if not isinstance(val, numbers.Number):
+        raise Exception(f'{val} must be a number')
+    return func(val)
+
+
+# arithmetical operations
+
+
+def _abs(data, expr):
+    val = expr(data)
+    if not isinstance(val, numbers.Number):
+        raise Exception(f'{val} must be a number')
+    return abs(val)
+
+
 # comparison functions
+
+
 def eq(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.eq)
 
@@ -42,15 +63,24 @@ def lt(data, left_expr, right_expr) -> bool:
 def lte(data, left_expr, right_expr) -> bool:
     return dual_expr(data, left_expr, right_expr, operator.le)
 
+
 def in_range(data, expr, low, high):
     return low(data) <= expr(data) <= high(data)
 
 
-def _abs(data, expr):
-    val = expr(data)
-    if not isinstance(val, numbers.Number):
-        raise Exception(f'{val} must be a number')
-    return abs(val) 
+# float numbers operations
+
+
+def ceil(data, expr) -> int:
+    return unary_number_expr(data, expr, math.ceil)
+
+
+def floor(data, expr):
+    return unary_number_expr(data, expr, math.floor)
+
+
+def _round(data, expr):
+    return unary_number_expr(data, expr, round)
 
 
 # string matching functions
@@ -242,4 +272,9 @@ def is_empty(data, expr):
     if isinstance(value, (str, list)):
         return len(value) == 0
 
-    raise Exception(f"is_empty could be applied to lists and strings {type(value).__name__} found")
+    raise Exception(
+        f"is_empty could be applied to lists and strings {type(value).__name__} found")
+
+# date and time
+
+# cast functions

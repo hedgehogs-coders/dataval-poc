@@ -1,6 +1,7 @@
+from functools import lru_cache
 from typing import List, Optional
 
-from handlers import _abs, _all, _if, _not, contains, ends_with, eq, eq_delta, first, in_range, last, length, neq, none, path, some, split, starts_with
+from handlers import _abs, _all, _if, _not, _round, ceil, contains, ends_with, eq, eq_delta, first, floor, in_range, last, length, neq, none, path, some, split, starts_with
 
 
 class TreeNode:
@@ -11,13 +12,16 @@ class TreeNode:
 
     def __init__(self, obj: list, is_parent=False):
         if not is_parent:
-            self._expression = obj[0] if isinstance(obj, list) else None if isinstance(obj, dict) else obj
+            self._expression = obj[0] if isinstance(
+                obj, list) else None if isinstance(obj, dict) else obj
             if isinstance(obj, list) and len(obj) > 1:
                 self._leafs: list[TreeNode] = [
                     as_tree(item, is_parent) for item in obj[1:]]
             elif isinstance(obj, dict) and "rule" in obj and isinstance(obj['rule'], list):
-                self._name = obj.get('name', f'validation rule: {obj["rule"][0]}')
-                self._error_message = obj.get('error_message', f'error in rule: {obj["rule"][0]}')
+                self._name = obj.get(
+                    'name', f'validation rule: {obj["rule"][0]}')
+                self._error_message = obj.get(
+                    'error_message', f'error in rule: {obj["rule"][0]}')
                 self._leafs: list[TreeNode] = [as_tree(obj['rule'], is_parent)]
         else:
             self._leafs = [as_tree(leaf, False) for leaf in obj]
@@ -50,8 +54,8 @@ def get_handler_for(node: TreeNode):
         return path_handler
     if is_primitive_node(node):
         return literal_handler
-    if is_function_node(node):
-        return get_function_handler(node)
+    if is_function_node(node._expression):
+        return get_function_handler(node._expression)
     if is_root_rule_node(node):
         return rule_node_handler(node)
 
@@ -65,6 +69,7 @@ def get_handlers(node: TreeNode):
 
     return result
 
+
 def is_path_node(value: TreeNode):
     expr = value._expression
     return isinstance(expr, str) and expr.startswith('$.') and not hasattr(value, '_leafs')
@@ -75,12 +80,13 @@ def is_primitive_node(value: TreeNode):
     return isinstance(expr, (str, int, float, bool)) and not hasattr(value, '_leafs')
 
 # in case we are going to support nested rules sometime
+
+
 def is_root_rule_node(value: TreeNode):
     return value._expression is None and isinstance(value._name, str) and isinstance(value._error_message, str)
 
 
-def is_function_node(leaf: TreeNode):
-    expr = leaf._expression
+def is_function_node(expr: str):
     return expr in [
         "eq",
         "eq_delta",
@@ -100,47 +106,57 @@ def is_function_node(leaf: TreeNode):
         "or",
         "if",
         "in-range",
-        "abs"
+        "abs",
+        "ceil",
+        "floor",
+        "round"
     ]
 
 
-def get_function_handler(node: TreeNode):
-    if node._expression == "eq":
+@lru_cache(500)
+def get_function_handler(node_expression: str):
+    if node_expression == "eq":
         return eq_handler
-    if node._expression == "eq_delta":
+    if node_expression == "eq_delta":
         return eq_delta_handler
-    if node._expression == "neq":
+    if node_expression == "neq":
         return neq_handler
-    if node._expression == "length":
+    if node_expression == "length":
         return length_handler
-    if node._expression == "split":
+    if node_expression == "split":
         return split_handler
-    if node._expression == "not":
+    if node_expression == "not":
         return not_handler
-    if node._expression == "starts-with":
+    if node_expression == "starts-with":
         return starts_with_handler
-    if node._expression == "ends-with":
+    if node_expression == "ends-with":
         return ends_with_handler
-    if node._expression == "contains":
+    if node_expression == "contains":
         return contains_handler
-    if node._expression == "first":
+    if node_expression == "first":
         return first_handler
-    if node._expression == "last":
+    if node_expression == "last":
         return last_handler
-    if node._expression in ["all", "and"]:
+    if node_expression in ["all", "and"]:
         return all_handler
-    if node._expression in ["some", "or"]:
+    if node_expression in ["some", "or"]:
         return some_handler
-    if node._expression == "none":
+    if node_expression == "none":
         return none_handler
-    if node._expression == "if":
+    if node_expression == "if":
         return if_handler
-    if node._expression == "in-range":
+    if node_expression == "in-range":
         return in_range_handler
-    if node._expression == "abs":
+    if node_expression == "abs":
         return abs_handler
+    if node_expression == "ceil":
+        return ceil_handler
+    if node_expression == "floor":
+        return floor_handler
+    if node_expression == "round":
+        return round_handler
 
-    raise Exception(f'handler {node._expression} not implemented or unknown')
+    raise Exception(f'handler {node_expression} not implemented or unknown')
 
 
 def eq_handler(node: TreeNode):
@@ -165,6 +181,7 @@ def neq_handler(node: TreeNode):
     args = get_handlers(node)
     return lambda data: neq(data, *args)
 
+
 def in_range_handler(node: TreeNode):
     ensure_leafs(node, 3)
     args = get_handlers(node)
@@ -175,6 +192,24 @@ def abs_handler(node: TreeNode):
     ensure_leafs(node, 1)
     args = get_handlers(node)
     return lambda data: _abs(data, *args)
+
+
+def ceil_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: ceil(data, *args)
+
+
+def floor_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: floor(data, *args)
+
+
+def round_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: _round(data, *args)
 
 
 def length_handler(node: TreeNode):
