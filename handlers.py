@@ -265,11 +265,17 @@ def is_boolean(data, expr):
 
 
 def is_object(data, expr):
+    """
+    not implemented
+    """
     obj_val = expr(data)
     return isinstance(obj_val, dict)
 
 
 def is_list(data, expr):
+    """
+    not implemented
+    """
     list_val = expr(data)
     return isinstance(list_val, list)
 

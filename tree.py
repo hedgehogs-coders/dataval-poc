@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import List, Optional
 
-from handlers import _abs, _all, _if, _not, _round, ceil, concat, contains, ends_with, eq, eq_delta, exists, first, floor, in_range, last, length, lookup, neq, none, path, some, split, starts_with
+from handlers import _abs, _all, _if, _not, _round, ceil, concat, contains, ends_with, eq, eq_delta, exists, first, floor, in_range, is_alphanumeric, is_float, is_integer, is_number, is_string, last, length, lookup, neq, none, path, some, split, starts_with
 
 
 class TreeNode:
@@ -112,7 +112,14 @@ def is_function_node(expr: str):
         "round",
         "exists",
         "concat",
-        "lookup"
+        "lookup",
+        "is_number",
+        "is_integer",
+        "is_float",
+        "is_alphanumeric",
+        "is_string",
+        "is_boolean",
+        "is_null"
     ]
 
 
@@ -164,7 +171,16 @@ def get_function_handler(node_expression: str):
         return concat_handler
     if node_expression == "lookup":
         return lookup_handler
-
+    if node_expression == "is_number":
+        return is_number_handler
+    if node_expression == "is_integer":
+        return is_integer_handler
+    if node_expression == "is_float":
+        return is_float_handler
+    if node_expression == "is_alphanumeric":
+        return is_alphanumeric_handler
+    if node_expression == "is_string":
+        return is_string_handler
     raise Exception(f'handler {node_expression} not implemented or unknown')
 
 
@@ -310,7 +326,8 @@ def exists_handler(node: TreeNode):
 
 def concat_handler(node: TreeNode):
     if len(node._leafs) < 1:
-        raise Exception("concat expects something to concatenate, no parts were provided")
+        raise Exception(
+            "concat expects something to concatenate, no parts were provided")
 
     args = get_handlers(node)
     return lambda data: concat(data, *args)
@@ -320,3 +337,33 @@ def lookup_handler(node: TreeNode):
     ensure_leafs(node, 1)
     args = get_handlers(node)
     return lambda data: lookup(data, *args)
+
+
+def is_number_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: is_number(data, *args)
+
+
+def is_integer_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: is_integer(data, *args)
+
+
+def is_float_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: is_float(data, *args)
+
+
+def is_alphanumeric_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: is_alphanumeric(data, *args)
+
+
+def is_string_handler(node: TreeNode):
+    ensure_leafs(node, 1)
+    args = get_handlers(node)
+    return lambda data: is_string(data, *args)
